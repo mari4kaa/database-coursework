@@ -429,7 +429,7 @@ psql -d versys -f ./seed.sql -U marcus
 psql -d versys -U marcus
 ```
 
-## RESTfull сервіс для управління даними
+## RESTful сервіс для управління даними
 
 ### Схема бази даних
 ```typescript
