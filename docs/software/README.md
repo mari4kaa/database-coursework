@@ -431,3 +431,6 @@ psql -d versys -U marcus
 
 ## RESTfull сервіс для управління даними
 
+```
+
+```

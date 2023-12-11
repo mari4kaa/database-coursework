@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model attachments {
+  id         Int      @id @default(autoincrement())
+  url        String   @db.VarChar(200)
+  format     String   @db.VarChar(15)
+  task_id    Int
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  tasks      tasks    @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@index([task_id])
+}
+
+model grants {
+  role_id       Int
+  permission_id Int
+  created_at    DateTime    @default(now()) @db.Timestamp(6)
+  permissions   permissions @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+  roles         roles       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@unique([role_id, permission_id])
+}
+
+model labels {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(30)
+  color String @db.VarChar(15)
+  tags  tags[]
+}
+
+model members {
+  id           Int            @id @default(autoincrement())
+  user_id      Int
+  project_id   Int
+  role_id      Int
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?      @db.Timestamp(6)
+  projects     projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  roles        roles          @relation(fields: [role_id], references: [id])
+  users        users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  participants participants[]
+
+  @@unique([user_id, project_id])
+}
+
+model messages {
+  id            Int             @id @default(autoincrement())
+  content       String          @db.VarChar(240)
+  created_at    DateTime        @default(now()) @db.Timestamp(6)
+  sheduled_at   DateTime        @db.Timestamp(6)
+  notifications notifications[]
+}
+
+model notifications {
+  user_id    Int
+  message_id Int
+  messages   messages @relation(fields: [message_id], references: [id], onDelete: Cascade)
+  users      users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, message_id])
+}
+
+model participants {
+  id         Int              @id @default(autoincrement())
+  member_id  Int
+  task_id    Int
+  role       participant_role
+  created_at DateTime         @default(now()) @db.Timestamp(6)
+  members    members          @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  tasks      tasks            @relation(fields: [task_id], references: [id], onDelete: Cascade)
+  reviews    reviews[]
+
+  @@unique([member_id, task_id])
+}
+
+model permissions {
+  id         Int      @id @default(autoincrement())
+  rule       String   @unique @db.VarChar(45)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+  grants     grants[]
+}
+
+model projects {
+  id          Int            @id @default(autoincrement())
+  title       String         @unique @db.VarChar(50)
+  status      project_status @default(inactive)
+  start_date  DateTime       @db.Timestamp(6)
+  end_date    DateTime?      @db.Timestamp(6)
+  created_at  DateTime       @default(now()) @db.Timestamp(6)
+  updated_at  DateTime?      @db.Timestamp(6)
+  logo        String?        @db.VarChar(200)
+  description String?        @db.VarChar(4000)
+  members     members[]
+  tasks       tasks[]
+}
+
+model reviews {
+  id             Int          @id @default(autoincrement())
+  task_id        Int
+  participant_id Int
+  replied_to     Int?
+  created_at     DateTime     @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?    @db.Timestamp(6)
+  content        String       @db.VarChar(1000)
+  participants   participants @relation(fields: [participant_id], references: [id], onDelete: Cascade)
+  reviews        reviews?     @relation("reviewsToreviews", fields: [replied_to], references: [id], onDelete: Cascade)
+  other_reviews  reviews[]    @relation("reviewsToreviews")
+  tasks          tasks        @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@index([task_id])
+}
+
+model roles {
+  id      Int       @id @default(autoincrement())
+  name    String    @unique @db.VarChar(45)
+  grants  grants[]
+  members members[]
+}
+
+model tags {
+  label_id Int
+  task_id  Int
+  labels   labels @relation(fields: [label_id], references: [id], onDelete: Cascade)
+  tasks    tasks  @relation(fields: [task_id], references: [id], onDelete: Cascade)
+
+  @@unique([label_id, task_id])
+}
+
+model tasks {
+  id           Int            @id @default(autoincrement())
+  title        String         @db.VarChar(50)
+  status       String         @db.VarChar(50)
+  project_id   Int
+  description  String?        @db.VarChar(500)
+  deadline     DateTime?      @db.Timestamp(6)
+  created_at   DateTime       @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?      @db.Timestamp(6)
+  attachments  attachments[]
+  participants participants[]
+  reviews      reviews[]
+  tags         tags[]
+  projects     projects       @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@index([project_id])
+}
+
+model users {
+  id            Int              @id @default(autoincrement())
+  login         String           @unique @db.VarChar(30)
+  password      String           @db.VarChar(256)
+  email         String?          @unique @db.VarChar(40)
+  phone         String?          @unique @db.VarChar(20)
+  avatar        String?          @db.VarChar(200)
+  system_role   user_system_role
+  created_at    DateTime         @default(now()) @db.Timestamp(6)
+  updated_at    DateTime?        @db.Timestamp(6)
+  members       members[]
+  notifications notifications[]
+}
+
+enum participant_role {
+  author
+  assignee
+  reviewer
+  participant
+}
+
+enum project_status {
+  active
+  inactive
+}
+
+enum user_system_role {
+  user
+  admin
+}
