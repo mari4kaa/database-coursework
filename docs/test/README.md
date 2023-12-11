@@ -45,13 +45,13 @@
 
 ## Обробка помилок
 
-### Bad request
+## Bad request
 ### Користувач:
 ![bad_post_user](./bad_post_user.png)
 ### Проєкт:
 ![bad_post_project](./bad_post_project.png)
 
-### Not found
+## Not found
 ### Користувач:
 ![bad_get_user](./bad_get_user.png)
 ![bad_delete_user](./bad_delete_user.png)
