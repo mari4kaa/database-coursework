@@ -2,9 +2,9 @@
   "name": "database-coursework",
   "version": "2.1.0",
   "main": "index.js",
-  "description": "Databases course work template",
+  "description": "Databases course work",
   "repository": "https://github.com/kol-oss/database-cousework",
-  "author": "Khozhainov Mykola <kolyakhozhajinov@gmail.com>",
+  "author": "Mariia Kryvokhata <m.krivokhata@gmail.com>",
   "license": "ECL 2.0",
   "scripts": {
     "docs:dev": "npx vuepress dev docs",
